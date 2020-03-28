@@ -1,0 +1,80 @@
+import pygame
+import random
+pygame.init()
+
+win = pygame.display.set_mode((600,600))
+
+pygame.display.set_caption("Practice")
+
+class player(object):
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.vel = 8
+    def draw(self, win):
+        pygame.draw.rect(win, (255,255,255), (self.x, self.y, self.width, self.height))
+
+class meteorits(object):
+    def __init__(self, x, y, radius, vel):
+        self.x = x
+        self.y = y
+        self.radius = radius
+        self.vel = vel
+    def draw(self, win):
+        pygame.draw.circle(win, (255, 0, 0), (self.x, self.y), self.radius)
+
+player1 = player(250, 400, 100, 25)
+meteorites = []
+meteoritesLoop = 0
+createMeteorite = 0
+score = 0
+negscore = 0
+clock = pygame.time.Clock()
+run = True
+font = pygame.font.SysFont("comicsans", 30, True, True)
+
+def drawWin():
+    win.fill((0,0,0))
+    text = font.render("Score: " + str(score) + " // " + str(negscore), 1, (255, 255, 255))
+    win.blit(text, (0, 0))
+    player1.draw(win)
+    for meteorit in meteorites:
+        meteorit.draw(win)
+    pygame.display.update()
+
+
+
+while run == True:
+    clock.tick(60) 
+    for meteorit in meteorites:
+        if (meteorit.y + meteorit.radius / 2 > player1.y and meteorit.y + meteorit.radius / 2 < player1.y + player1.height) and (meteorit.x + meteorit.radius / 2 > player1.x and meteorit.x - meteorit.radius / 2 < player1.x + player1.width):
+            meteorites.pop(meteorites.index(meteorit))
+            score += 1
+        elif meteorit.y > 500:
+            meteorites.pop(meteorites.index(meteorit))
+            negscore += 1
+        else:
+            meteorit.y += meteorit.vel
+    if meteoritesLoop > 0:
+        meteoritesLoop += 1
+    if meteoritesLoop > 15:
+        meteoritesLoop = 0
+    createMeteorite += 1
+    
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            run = False
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_RIGHT]:
+        player1.x += player1.vel
+    if keys[pygame.K_LEFT]:
+        player1.x -= player1.vel
+    if len(meteorites) < 5 and createMeteorite % 50 == 0:
+        meteorites.append(meteorits(random.randint(100, 500), 50, random.randint(10, 15), random.randint(1, 2)))
+    meteoritesLoop = 1
+
+    drawWin()
+
+pygame.quit()
